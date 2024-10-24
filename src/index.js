@@ -1,6 +1,6 @@
 const sequelize = require('./sequelize');  // Importar la instancia de Sequelize
 const app = require('./express/App')
-const port = 8000
+const PORT = 8000
 
 async function assertDatabaseConnectionOk() {
 	console.log(`Checking database connection...`);
@@ -29,24 +29,3 @@ async function init() {
 }
 
 init();
-
-app.use(express.json());
-
-// Rutas simples
-app.get('/', (req, res) => {
-  res.send('¡Backend en Express con SQLite y Sequelize!');
-});
-
-// Sincronización de la base de datos
-sequelize.sync({ force: true })  // Sincronizar la base de datos con las tablas
-  .then(() => {
-    console.log('Base de datos y tablas creadas.');
-  })
-  .catch((error) => {
-    console.error('Error al sincronizar la base de datos:', error);
-  });
-
-// Iniciar el servidor
-app.listen(port, () => {
-  console.log(`Servidor corriendo en el puerto ${port}`);
-});
