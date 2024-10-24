@@ -1,23 +1,23 @@
 function applyExtraSetup(sequelize) {
     const {Carta, Restaurant, Plato, Bebida, Pago, Mesa, Cliente, Reserva} = sequelize.models
 
-    Carta.belongsTo(models.Restaurant, { foreignKey: 'idRestaurant' });
-    Carta.belongsToMany(models.Plato, { through: 'CartaPlato', foreignKey: 'idCarta' });
-    Carta.belongsToMany(models.Bebida, { through: 'CartaBebida', foreignKey: 'idCarta' });
+    Carta.belongsTo(Restaurant, { foreignKey: 'idRestaurant' });
+    Carta.belongsToMany(Plato, { through: 'CartaPlato', foreignKey: 'idCarta' });
+    Carta.belongsToMany(Bebida, { through: 'CartaBebida', foreignKey: 'idCarta' });
 
-    Pago.hasMany(models.Reserva, { foreignKey: 'idPago' });
+    Pago.hasMany(Reserva, { foreignKey: 'idPago' });
 
-    Mesa.hasMany(models.Reserva, { foreignKey: 'idMesa' });
+    Mesa.hasMany(Reserva, { foreignKey: 'idMesa' });
 
-    Reserva.belongsTo(models.Cliente, { foreignKey: 'idCliente' });
-    Reserva.belongsTo(models.Restaurant, { foreignKey: 'idRestaurant' });
-    Reserva.belongsTo(models.Mesa, { foreignKey: 'idMesa' });
-    Reserva.belongsTo(models.Pago, { foreignKey: 'idPago' });
+    Reserva.belongsTo(Cliente, { foreignKey: 'idCliente' });
+    Reserva.belongsTo(Restaurant, { foreignKey: 'idRestaurant' });
+    Reserva.belongsTo(Mesa, { foreignKey: 'idMesa' });
+    Reserva.belongsTo(Pago, { foreignKey: 'idPago' });
 
-    Cliente.hasMany(models.Reserva, { foreignKey: 'idCliente' });
+    Cliente.hasMany(Reserva, { foreignKey: 'idCliente' });
 
-    Restaurant.hasMany(models.Reserva, { foreignKey: 'idRestaurant' });
-    Restaurant.hasOne(models.Carta, { foreignKey: 'idRestaurant' });
+    Restaurant.hasMany(Reserva, { foreignKey: 'idRestaurant' });
+    Restaurant.hasOne(Carta, { foreignKey: 'idRestaurant' });
     
 };
 
