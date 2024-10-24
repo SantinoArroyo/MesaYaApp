@@ -7,9 +7,9 @@ const routes = {
     clientes: require('./routes/Clientes'),
     mesas: require('./routes/Mesas'),
     pagos: require('./routes/Pagos'),
-    platos: require('/routes/Platos'),
-    reservas: require('/routes/Reservas'),
-    restaurants: require('/routes/Restaurants')
+    platos: require('./routes/Platos'),
+    reservas: require('./routes/Reservas'),
+    restaurants: require('./routes/Restaurants')
 }
 
 const app = express();
