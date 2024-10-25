@@ -2,14 +2,14 @@ const express = require('express');
 const bodyParser = require('body-parser');
 
 const routes = {
-    Bebidas: require('./routes/Bebidas'),
-    Cartas: require('./routes/Cartas'),
-    Clientes: require('./routes/Clientes'),
+    bebidas: require('./routes/Bebidas'),
+    cartas: require('./routes/Cartas'),
+    clientes: require('./routes/Clientes'),
     mesas: require('./routes/Mesas'),
-    Pagos: require('./routes/Pagos'),
-    Platos: require('./routes/Platos'),
-    Reservas: require('./routes/Reservas'),
-    Restaurants: require('./routes/Restaurants')
+    pagos: require('./routes/Pagos'),
+    platos: require('./routes/Platos'),
+    reservas: require('./routes/Reservas'),
+    restaurants: require('./routes/Restaurants')
 }
 
 const app = express();
