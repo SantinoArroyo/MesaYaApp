@@ -3,14 +3,14 @@ const { getIdParam } = require('../helpers');
 
 // Obtener todas las cartas
 async function getAll(req, res) {
-	const cartas = await models.carta.findAll();
+	const cartas = await models.Carta.findAll();
 	res.status(200).json(cartas);
 };
 
 // Obtener una carta por ID
 async function getById(req, res) {
 	const id = getIdParam(req);
-	const carta = await models.carta.findOne({
+	const carta = await models.Carta.findOne({
 		where: {
 			idCarta: id  
 		}
@@ -27,7 +27,7 @@ async function create(req, res) {
 	if (req.body.idCarta) { 
 		res.status(400).send(`Bad request: El ID no debe proporcionarse, ya que lo determina automáticamente la base de datos.`);
 	} else {
-		await models.carta.create(req.body);
+		await models.Carta.create(req.body);
 		res.status(201).end();
 	}
 };
@@ -38,7 +38,7 @@ async function update(req, res) {
 
 	// Solo aceptamos la solicitud de actualización si el parámetro `:id` coincide con el ID del cuerpo de la solicitud
 	if (req.body.idCarta === id) {  
-		await models.carta.update(req.body, {
+		await models.Carta.update(req.body, {
 			where: {
 				idCarta: id 
 			}
@@ -52,7 +52,7 @@ async function update(req, res) {
 // Eliminar una carta
 async function remove(req, res) {
 	const id = getIdParam(req);
-	await models.carta.destroy({
+	await models.Carta.destroy({
 		where: {
 			idCarta: id  
 		}

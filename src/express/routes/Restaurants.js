@@ -3,14 +3,14 @@ const { getIdParam } = require('../helpers');
 
 // Obtener todas las reservas
 async function getAll(req, res) {
-	const restaurant = await models.restaurant.findAll();
+	const restaurant = await models.Restaurant.findAll();
 	res.status(200).json(restaurant);
 };
 
 // Obtener una reserva por ID
 async function getById(req, res) {
 	const id = getIdParam(req);
-	const restaurant = await models.restaurant.findOne({
+	const restaurant = await models.Restaurant.findOne({
 		where: {
 			idRestaurant: id  
 		}
@@ -27,7 +27,7 @@ async function create(req, res) {
 	if (req.body.idRestaurant) { 
 		res.status(400).send(`Bad request: El ID no debe proporcionarse, ya que lo determina automáticamente la base de datos.`);
 	} else {
-		await models.restaurant.create(req.body);
+		await models.Restaurant.create(req.body);
 		res.status(201).end();
 	}
 };
@@ -38,7 +38,7 @@ async function update(req, res) {
 
 	// Solo aceptamos la solicitud de actualización si el parámetro `:id` coincide con el ID del cuerpo de la solicitud
 	if (req.body.idRestaurant === id) {  
-		await models.restaurant.update(req.body, {
+		await models.Restaurant.update(req.body, {
 			where: {
 				idRestaurant: id  
 			}
@@ -52,7 +52,7 @@ async function update(req, res) {
 // Eliminar una reserva
 async function remove(req, res) {
 	const id = getIdParam(req);
-	await models.restaurant.destroy({
+	await models.Restaurant.destroy({
 		where: {
 			idRestaurant: id  
 		}

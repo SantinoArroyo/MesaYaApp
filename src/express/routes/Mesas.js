@@ -3,14 +3,14 @@ const { getIdParam } = require('../helpers');
 
 // Obtener todas las mesas
 async function getAll(req, res) {
-	const mesas = await models.mesa.findAll();
+	const mesas = await models.Mesa.findAll();
 	res.status(200).json(mesas);
 };
 
 // Obtener una mesa por ID
 async function getById(req, res) {
 	const id = getIdParam(req);
-	const mesa = await models.mesa.findOne({
+	const mesa = await models.Mesa.findOne({
 		where: {
 			idMesa: id  
 		}
@@ -27,7 +27,7 @@ async function create(req, res) {
 	if (req.body.idMesa) {  
 		res.status(400).send(`Bad request: El ID no debe proporcionarse, ya que lo determina automáticamente la base de datos.`);
 	} else {
-		await models.mesa.create(req.body);
+		await models.Mesa.create(req.body);
 		res.status(201).end();
 	}
 };
@@ -38,7 +38,7 @@ async function update(req, res) {
 
 	// Solo aceptamos la solicitud de actualización si el parámetro `:id` coincide con el ID del cuerpo de la solicitud
 	if (req.body.idMesa === id) {  
-		await models.mesa.update(req.body, {
+		await models.Mesa.update(req.body, {
 			where: {
 				idMesa: id  
 			}
@@ -52,7 +52,7 @@ async function update(req, res) {
 // Eliminar una mesa
 async function remove(req, res) {
 	const id = getIdParam(req);
-	await models.mesa.destroy({
+	await models.Mesa.destroy({
 		where: {
 			idMesa: id  
 		}

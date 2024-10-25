@@ -3,14 +3,14 @@ const { getIdParam } = require('../helpers');  // Asegúrate de tener esta funci
 
 // Obtener todas las bebidas
 async function getAll(req, res) {
-	const bebidas = await models.bebida.findAll();
+	const bebidas = await models.Bebida.findAll();
 	res.status(200).json(bebidas);
 };
 
 // Obtener una bebida por ID
 async function getById(req, res) {
 	const id = getIdParam(req);
-	const bebida = await models.bebida.findOne({
+	const bebida = await models.Bebida.findOne({
 		where: {
 			idBebida: id   
 		}
@@ -27,7 +27,7 @@ async function create(req, res) {
 	if (req.body.idBebida) {  
 		res.status(400).send(`Bad request: El ID no debe proporcionarse, ya que lo determina automáticamente la base de datos.`);
 	} else {
-		await models.bebida.create(req.body);
+		await models.Bebida.create(req.body);
 		res.status(201).end();
 	}
 };
@@ -38,7 +38,7 @@ async function update(req, res) {
 
 	// Solo aceptamos la solicitud de actualización si el parámetro `:id` coincide con el ID del cuerpo de la solicitud
 	if (req.body.idBebida === id) {  
-		await models.bebida.update(req.body, {
+		await models.Bebida.update(req.body, {
 			where: {
 				idBebida: id  
 			}
@@ -52,7 +52,7 @@ async function update(req, res) {
 // Eliminar una bebida
 async function remove(req, res) {
 	const id = getIdParam(req);
-	await models.bebida.destroy({
+	await models.Bebida.destroy({
 		where: {
 			idBebida: id  
 		}
