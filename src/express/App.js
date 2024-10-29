@@ -58,10 +58,16 @@ for (const [routeName, routeController] of Object.entries(routes)) {
 			makeHandlerAwareOfAsyncErrors(routeController.update)
         )
     }
-    if(routeController.remove) {
+    if(routeController.removeById) {
         app.delete(
 			`/api/${routeName}/:id`,
-			makeHandlerAwareOfAsyncErrors(routeController.remove)
+			makeHandlerAwareOfAsyncErrors(routeController.removeById)
+		)
+    }
+    if(routeController.removeAll) {
+        app.delete(
+			`/api/${routeName}/:id`,
+			makeHandlerAwareOfAsyncErrors(routeController.removeAll)
 		)
     }
 }

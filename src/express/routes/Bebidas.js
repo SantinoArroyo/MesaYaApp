@@ -50,7 +50,7 @@ async function update(req, res) {
 };
 
 // Eliminar una bebida
-async function remove(req, res) {
+async function removeById(req, res) {
 	const id = getIdParam(req);
 	await models.Bebida.destroy({
 		where: {
@@ -60,11 +60,26 @@ async function remove(req, res) {
 	res.status(200).end();
 };
 
+// Eliminar todas las bebidas
+async function removeAll(req, res) {
+    try {
+        await models.Bebida.destroy({
+            where: {},  // Esto elimina todas las bebidas
+            truncate: true  // Esto reinicia el contador de ID
+        });
+        res.status(200).json({ message: 'Todas las bebidas han sido eliminadas' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error al eliminar todas las bebidas', error: error.message });
+    }
+}
+
 // Exportar las funciones
 module.exports = {
 	getAll,
 	getById,
 	create,
 	update,
-	remove,
+	removeById,
+	removeAll,
+
 };

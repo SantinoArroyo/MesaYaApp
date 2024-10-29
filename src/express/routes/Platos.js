@@ -50,7 +50,7 @@ async function update(req, res) {
 };
 
 // Eliminar un plato
-async function remove(req, res) {
+async function removeById(req, res) {
 	const id = getIdParam(req);
 	await models.Plato.destroy({
 		where: {
@@ -59,12 +59,24 @@ async function remove(req, res) {
 	});
 	res.status(200).end();
 };
-
+// Eliminar todos los platos
+async function removeAll(req, res) {
+    try {
+        await models.Plato.destroy({
+            where: {},  // Esto elimina todos los platos
+            truncate: true  // Esto reinicia  el contador de ID
+        });
+        res.status(200).json({ message: 'Todos los platos han sido eliminados' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error al eliminar todos los platos', error: error.message });
+    }
+}
 // Exportar las funciones
 module.exports = {
 	getAll,
 	getById,
 	create,
 	update,
-	remove,
+	removeById,
+	removeAll,
 };

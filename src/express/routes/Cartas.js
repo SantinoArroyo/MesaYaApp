@@ -50,7 +50,7 @@ async function update(req, res) {
 };
 
 // Eliminar una carta
-async function remove(req, res) {
+async function removeById(req, res) {
 	const id = getIdParam(req);
 	await models.Carta.destroy({
 		where: {
@@ -66,5 +66,5 @@ module.exports = {
 	getById,
 	create,
 	update,
-	remove,
+	removeById,
 };
