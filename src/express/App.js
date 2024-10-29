@@ -1,6 +1,9 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 
+// Importa tu archivo de autenticación
+const authRoutes = require('./routes/Auth');
+
 const routes = {
     bebidas: require('./routes/Bebidas'),
     cartas: require('./routes/Cartas'),
@@ -16,6 +19,9 @@ const app = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// Define la ruta para autenticación
+app.use('/api/auth', authRoutes);
 
 function makeHandlerAwareOfAsyncErrors(handler) {
 	return async function(req, res, next) {
