@@ -14,5 +14,13 @@ module.exports = (sequelize) => {
         telefono: DataTypes.STRING,
         categoria: DataTypes.STRING,
         CUIT: DataTypes.STRING,
-        });
+        idProvincia: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+        },
+        idLocalidad: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+        },
+    });
 };

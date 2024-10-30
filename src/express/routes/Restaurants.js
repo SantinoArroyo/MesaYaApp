@@ -59,6 +59,25 @@ async function removeById(req, res) {
 	});
 	res.status(200).end();
 };
+async function getByProvinciaAndLocalidad(req, res) {
+    const idProvincia = req.query.idProvincia;
+    const idLocalidad = req.query.idLocalidad;
+
+    const whereClause = {};
+    if (idProvincia) whereClause.idProvincia = idProvincia;
+    if (idLocalidad) whereClause.idLocalidad = idLocalidad;
+
+    const restaurants = await models.Restaurant.findAll({
+        where: whereClause,
+        include: [
+            { model: models.Provincia },
+            { model: models.Localidad }
+        ]
+    });
+
+    res.status(200).json(restaurants);
+}
+
 
 // Exportar las funciones
 module.exports = {
@@ -67,4 +86,5 @@ module.exports = {
 	create,
 	update,
 	removeById,
+	getByProvinciaAndLocalidad,
 };
