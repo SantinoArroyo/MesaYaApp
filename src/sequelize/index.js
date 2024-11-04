@@ -20,6 +20,8 @@ const modelDefiners = [
     require('./models/Plato'),
     require('./models/Reserva'),
     require('./models/Restaurant'),
+	require('./models/Provincia'),
+	require('./models/Localidad')
 ];
 
 // We define all models according to their files.

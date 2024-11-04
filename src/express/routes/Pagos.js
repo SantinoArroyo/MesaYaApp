@@ -50,7 +50,7 @@ async function update(req, res) {
 };
 
 // Eliminar un pago
-async function removeByIde(req, res) {
+async function removeById(req, res) {
 	const id = getIdParam(req);
 	await models.Pago.destroy({
 		where: {
