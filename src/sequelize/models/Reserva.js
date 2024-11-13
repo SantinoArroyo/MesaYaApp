@@ -9,5 +9,8 @@ module.exports = (sequelize) => {
         },
         fecha: DataTypes.DATE,
         horario: DataTypes.TIME,
+    }, {
+        tableName: 'Reserva',
+        timestamps: true
     });
 };

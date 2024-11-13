@@ -1,5 +1,8 @@
 const { models } = require('../../sequelize');
 const { getIdParam } = require('../helpers');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+const JWT_SECRET = '12345678';
 
 // Obtener todos los clientes
 async function getAll(req, res) {
@@ -24,12 +27,26 @@ async function getById(req, res) {
 
 // Crear un nuevo cliente
 async function create(req, res) {
-	if (req.body.idCliente) {  
-		res.status(400).send(`Bad request: El ID no debe proporcionarse, ya que lo determina automáticamente la base de datos.`);
-	} else {
-		await models.Cliente.create(req.body);
-		res.status(201).end();
-	}
+
+	const { nombre, apellido, email, contraseña, telefono, direccion, localidad, provincia } = req.body;
+    // Hashea la contraseña
+	const hashedPassword = await bcrypt.hash(contraseña, 10);
+
+    try {
+        const newUserC = await models.Cliente.create({
+            nombre,
+            apellido,
+            email,
+            contraseña: hashedPassword,
+            telefono,
+            direccion,
+			idLocalidad: localidad,
+			idProvincia: provincia
+        });
+        res.status(201).json(newUserC);
+    } catch (error) {
+        res.status(400).send('Error al registrar el usuario');
+    }
 };
 
 // Actualizar un cliente existente
@@ -60,6 +77,29 @@ async function removeById(req, res) {
 	res.status(200).end();
 };
 
+async function login(req, res) {
+    const { email, contraseña } = req.body;
+    
+    // Busca el usuario por email
+    const user = await models.Cliente.findOne({ where: { email } });
+    
+    if (!user) {
+        return res.status(401).send('Usuario o contraseña incorrectos');
+    }
+    
+    // Verifica la contraseña usando bcrypt
+    const isPasswordValid = await bcrypt.compare(contraseña, user.contraseña);
+    
+    if (!isPasswordValid) {
+        return res.status(401).send('Usuario o contraseña incorrectos');
+    }
+    
+    // Crea el token
+    const token = jwt.sign({ id: user.idCliente, email: user.email }, JWT_SECRET, { expiresIn: '1h' });
+    
+    res.status(200).json({ token });
+}
+
 // Exportar las funciones
 module.exports = {
 	getAll,
@@ -67,4 +107,5 @@ module.exports = {
 	create,
 	update,
 	removeById,
+	login
 };

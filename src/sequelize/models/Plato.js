@@ -10,5 +10,9 @@ module.exports = (sequelize) => {
         nombre: DataTypes.STRING,
         precio: DataTypes.FLOAT,
         descripcion: DataTypes.STRING,
+        categoria: DataTypes.STRING
+    }, {
+        tableName: 'Plato',
+        timestamps: true
     });
 };

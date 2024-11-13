@@ -1,8 +1,10 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const cors = require('cors');
+const multer = require('multer')
+const path = require("path");
 
-// Importa tu archivo de autenticación
-const authRoutes = require('./routes/Auth');
+const upload = multer({ dest: 'uploads/' });
 
 const routes = {
     bebidas: require('./routes/Bebidas'),
@@ -18,12 +20,12 @@ const routes = {
 }
 
 const app = express();
+app.use(cors())
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json({ type: 'application/json', limit: '50mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 
-// Define la ruta para autenticación
-app.use('/api/auth', authRoutes);
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 function makeHandlerAwareOfAsyncErrors(handler) {
     return async function(req, res, next) {
@@ -77,5 +79,10 @@ for (const [routeName, routeController] of Object.entries(routes)) {
 // Nuevas rutas específicas
 app.get('/api/localidades/provincia/:id', makeHandlerAwareOfAsyncErrors(routes.localidades.getByProvincia));
 app.get('/api/restaurants/filter', makeHandlerAwareOfAsyncErrors(routes.restaurants.getByProvinciaAndLocalidad));
+
+app.post('/api/logincliente', makeHandlerAwareOfAsyncErrors(routes.clientes.login))
+app.post('/api/loginrestaurant', makeHandlerAwareOfAsyncErrors(routes.restaurants.login))
+
+app.post('/api/restaurants/:id/upload-image', upload.single("imagen"), makeHandlerAwareOfAsyncErrors(routes.restaurants.uploadImage));
 
 module.exports = app;

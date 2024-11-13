@@ -11,5 +11,15 @@ module.exports = (sequelize) => {
             type: DataTypes.STRING,
             allowNull: false,
         },
+        idProvincia: {
+            type: DataTypes.INTEGER,
+            references: {
+                model: 'Provincia',
+                key: 'idProvincia'
+            }
+        }
+    }, {
+        tableName: 'Localidad',
+        timestamps: false
     });
 };

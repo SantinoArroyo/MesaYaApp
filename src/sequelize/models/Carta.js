@@ -8,5 +8,8 @@ module.exports = (sequelize) => {
             autoIncrement: true,
         },
         nombre: DataTypes.STRING,
+    },{
+        tableName: 'Carta',
+        timestamps: true
     });
 };

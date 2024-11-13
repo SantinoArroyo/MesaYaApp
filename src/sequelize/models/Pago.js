@@ -9,5 +9,8 @@ module.exports = (sequelize) => {
         },
         monto: DataTypes.FLOAT,
         fecha: DataTypes.DATE,
+    },{
+        tableName: 'Pago',
+        timestamps: true
     });
 };

@@ -10,5 +10,8 @@ module.exports = (sequelize) => {
         numero: DataTypes.INTEGER,
         estado: DataTypes.STRING,
         cantidadPersonas: DataTypes.INTEGER,
+    },{
+        tableName: 'Mesa',
+        timestamps: false
     });
 };
