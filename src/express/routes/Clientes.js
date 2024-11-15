@@ -27,12 +27,34 @@ async function getById(req, res) {
 
 // Crear un nuevo cliente
 async function create(req, res) {
-
-	const { nombre, apellido, email, contraseña, telefono, direccion, localidad, provincia } = req.body;
-    // Hashea la contraseña
-	const hashedPassword = await bcrypt.hash(contraseña, 10);
-
+    const { nombre, apellido, email, contraseña, telefono, direccion, localidad, provincia } = req.body;
+    
     try {
+        // Buscar el ID de la provincia por nombre
+        const provinciaData = await models.Provincia.findOne({
+            where: { nombre: provincia }
+        });
+        
+        if (!provinciaData) {
+            return res.status(400).json({ error: 'Provincia no encontrada' });
+        }
+
+        // Buscar el ID de la localidad por nombre y provincia
+        const localidadData = await models.Localidad.findOne({
+            where: { 
+                nombre: localidad,
+                idProvincia: provinciaData.idProvincia 
+            }
+        });
+
+        if (!localidadData) {
+            return res.status(400).json({ error: 'Localidad no encontrada' });
+        }
+
+        // Hashea la contraseña
+        const hashedPassword = await bcrypt.hash(contraseña, 10);
+
+        // Crear el cliente con los IDs correctos
         const newUserC = await models.Cliente.create({
             nombre,
             apellido,
@@ -40,14 +62,16 @@ async function create(req, res) {
             contraseña: hashedPassword,
             telefono,
             direccion,
-			idLocalidad: localidad,
-			idProvincia: provincia
+            idProvincia: provinciaData.idProvincia,
+            idLocalidad: localidadData.idLocalidad
         });
+
         res.status(201).json(newUserC);
     } catch (error) {
+        console.error('Error al registrar el usuario:', error);
         res.status(400).send('Error al registrar el usuario');
     }
-};
+}
 
 // Actualizar un cliente existente
 async function update(req, res) {

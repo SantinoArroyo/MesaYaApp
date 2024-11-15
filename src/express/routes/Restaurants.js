@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const JWT_SECRET = '12345678';
 const multer = require('multer');
-const fs = require('node:fs')
+const fs = require('node:fs');
 
 // Configura la ubicación donde se guardarán los archivos y el nombre del archivo
 const storage = multer.diskStorage({
@@ -21,13 +21,13 @@ const upload = multer({ storage });
 
 function saveImage(file) {
     const newPath = `./uploads/${file.originalname}`;
-    fs.renameSync(file.path, newPath)
-    return newPath
+    fs.renameSync(file.path, newPath);
+    return newPath;
 }
 
-// Obtener todas las reservas
+// Obtener todos los restaurantes
 async function getAll(req, res) {
-	const restaurant = await models.Restaurant.findAll();
+    const restaurant = await models.Restaurant.findAll();
     const baseUrl = `${req.protocol}://${req.get("host")}`;
 
     // Agrega la URL completa para cada imagen
@@ -35,30 +35,30 @@ async function getAll(req, res) {
         ...restaurant.toJSON(),
         imagen: restaurant.imagen ? `${baseUrl}/uploads/${restaurant.imagen}` : null,
     }));
-	res.status(200).json(restaurantsWithImageUrl);
-};
+    res.status(200).json(restaurantsWithImageUrl);
+}
 
-// Obtener una reserva por ID
+// Obtener un restaurante por ID
 async function getById(req, res) {
-	const id = getIdParam(req);
-	const restaurant = await models.Restaurant.findOne({
-		where: {
-			idRestaurant: id  
-		}
-	});
-	if (restaurant) {
-		res.status(200).json(restaurant);
-	} else {
-		res.status(404).send('404 - Reserva no encontrada');
-	}
-};
+    const id = getIdParam(req);
+    const restaurant = await models.Restaurant.findOne({
+        where: {
+            idRestaurant: id  
+        }
+    });
+    if (restaurant) {
+        res.status(200).json(restaurant);
+    } else {
+        res.status(404).send('404 - Restaurante no encontrado');
+    }
+}
 
-// Crear una nueva reserva
+// Crear un nuevo restaurante
 async function create(req, res) {
     const { nombre, email, direccion, contraseña, telefono, categoria, cuit, provincia, localidad} = req.body;
 
-	console.log('Datos recibidos en el backend:', req.body);
-	console.log("Contraseña recibida:", contraseña);
+    console.log('Datos recibidos en el backend:', req.body);
+    console.log("Contraseña recibida:", contraseña);
 
     // Hashea la contraseña
     const hashedPassword = await bcrypt.hash(contraseña, 10);
@@ -72,19 +72,85 @@ async function create(req, res) {
             telefono,
             categoria,
             cuit,
-			idProvincia: provincia,
-			idLocalidad: localidad,
+            idProvincia: provincia,
+            idLocalidad: localidad,
         });
 
-		if (!newUserR || !newUserR.id) {
+        if (!newUserR || !newUserR.id) {
             throw new Error("Error: El restaurante creado no tiene un ID.");
         }
         res.status(201).json(newUserR);
     } catch (error) {
         res.status(400).send('Error al registrar el usuario');
-		console.log('Error al registrar el restaurant:', error.response ? error.response.data : error.message);
+        console.log('Error al registrar el restaurant:', error.response ? error.response.data : error.message);
     }
-};
+}
+
+// Actualizar un restaurante existente
+async function update(req, res) {
+    const id = getIdParam(req);
+
+    // Solo aceptamos la solicitud de actualización si el parámetro `:id` coincide con el ID del cuerpo de la solicitud
+    if (req.body.idRestaurant === id) {  
+        await models.Restaurant.update(req.body, {
+            where: {
+                idRestaurant: id  
+            }
+        });
+        res.status(200).end();
+    } else {
+        res.status(400).send(`Bad request: El ID del parámetro (${id}) no coincide con el ID del cuerpo (${req.body.idRestaurant}).`);
+    }
+}
+
+// Eliminar un restaurante
+async function removeById(req, res) {
+    const id = getIdParam(req);
+    await models.Restaurant.destroy({
+        where: {
+            idRestaurant: id  
+        }
+    });
+    res.status(200).end();
+}
+
+async function getByProvinciaAndLocalidad(req, res) {
+    const idProvincia = req.query.idProvincia;
+    const idLocalidad = req.query.idLocalidad;
+
+    const whereClause = {};
+    if (idProvincia) whereClause.idProvincia = idProvincia;
+    if (idLocalidad) whereClause.idLocalidad = idLocalidad;
+
+    const restaurants = await models.Restaurant.findAll({
+        where: whereClause,
+        include: [
+            { model: models.Provincia },
+            { model: models.Localidad }
+        ]
+    });
+
+    res.status(200).json(restaurants);
+}
+
+async function login (req, res) {
+    const {email, contraseña} = req.body;
+    const user = await models.Restaurant.findOne({where: {email}})
+
+    if(!user) {
+        return res.status(401).send('Usuario o contraseña incorrectos')
+    }
+
+    const isPasswordValid = await bcrypt.compare(contraseña, user.contraseña)
+
+    if(!isPasswordValid){
+        return res.status(401).send('Usuario o contraseña incorrectos')
+    }
+
+    const token = jwt.sign({ id: user.idRestaurant, email: user.email }, JWT_SECRET, { expiresIn: '1h' });
+    
+    res.status(200).json({ token });
+}
 
 async function uploadImage(req, res) {
     console.log('Contenido de req.file:', req.file); // Verifica el contenido de req.file
@@ -112,83 +178,17 @@ async function uploadImage(req, res) {
         console.error('Error al subir la imagen:', error);
         res.status(500).send('Error al subir la imagen');
     }
-};
-
-
-// Actualizar una reserva existente
-async function update(req, res) {
-	const id = getIdParam(req);
-
-	// Solo aceptamos la solicitud de actualización si el parámetro `:id` coincide con el ID del cuerpo de la solicitud
-	if (req.body.idRestaurant === id) {  
-		await models.Restaurant.update(req.body, {
-			where: {
-				idRestaurant: id  
-			}
-		});
-		res.status(200).end();
-	} else {
-		res.status(400).send(`Bad request: El ID del parámetro (${id}) no coincide con el ID del cuerpo (${req.body.idReserva}).`);
-	}
-};
-
-// Eliminar una reserva
-async function removeById(req, res) {
-	const id = getIdParam(req);
-	await models.Restaurant.destroy({
-		where: {
-			idRestaurant: id  
-		}
-	});
-	res.status(200).end();
-};
-async function getByProvinciaAndLocalidad(req, res) {
-    const idProvincia = req.query.idProvincia;
-    const idLocalidad = req.query.idLocalidad;
-
-    const whereClause = {};
-    if (idProvincia) whereClause.idProvincia = idProvincia;
-    if (idLocalidad) whereClause.idLocalidad = idLocalidad;
-
-    const restaurants = await models.Restaurant.findAll({
-        where: whereClause,
-        include: [
-            { model: models.Provincia },
-            { model: models.Localidad }
-        ]
-    });
-
-    res.status(200).json(restaurants);
 }
-
-async function login (req, res) {
-	const {email, contraseña} = req.body;
-	const user = await models.Restaurant.findOne({where: {email}})
-
-	if(!user) {
-		return res.status(401).send('Usuario o contraseña incorrectos')
-	}
-
-	const isPasswordValid = await bcrypt.compare(contraseña, user.contraseña)
-
-	if(!isPasswordValid){
-		return res.status(401).send('Usuario o contraseña incorrectos')
-	}
-
-    const token = jwt.sign({ id: user.idRestaurant, email: user.email }, JWT_SECRET, { expiresIn: '1h' });
-    
-    res.status(200).json({ token });
-}
-
 
 // Exportar las funciones
 module.exports = {
-	getAll,
-	getById,
-	create,
-	update,
-	removeById,
-	getByProvinciaAndLocalidad,
-	login,
-	uploadImage
+    getAll,
+    getById,
+    create,
+    update,
+    removeById,
+    getByProvinciaAndLocalidad,
+    login,
+    uploadImage,
+    upload // Exportar el middleware upload
 };

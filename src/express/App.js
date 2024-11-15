@@ -1,10 +1,21 @@
 const express = require('express');
-const bodyParser = require('body-parser');
 const cors = require('cors');
-const multer = require('multer')
-const path = require("path");
+const bodyParser = require('body-parser');
+const multer = require('multer');
+const path = require('path');
+const { models } = require('../sequelize');
 
-const upload = multer({ dest: 'uploads/' });
+// Configuración de multer
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/');
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + '-' + file.originalname);
+    }
+});
+
+const upload = multer({ storage });
 
 const routes = {
     bebidas: require('./routes/Bebidas'),
@@ -20,7 +31,12 @@ const routes = {
 }
 
 const app = express();
-app.use(cors())
+
+// Configuración de CORS
+app.use(cors({
+    origin: 'http://localhost:3000', // Cambia esto a la URL de tu frontend
+    credentials: true
+}));
 
 app.use(bodyParser.json({ type: 'application/json', limit: '50mb' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
@@ -83,6 +99,33 @@ app.get('/api/restaurants/filter', makeHandlerAwareOfAsyncErrors(routes.restaura
 app.post('/api/logincliente', makeHandlerAwareOfAsyncErrors(routes.clientes.login))
 app.post('/api/loginrestaurant', makeHandlerAwareOfAsyncErrors(routes.restaurants.login))
 
-app.post('/api/restaurants/:id/upload-image', upload.single("imagen"), makeHandlerAwareOfAsyncErrors(routes.restaurants.uploadImage));
+app.post('/api/restaurants/:id/upload-image', upload.single('imagen'), async (req, res) => {
+    try {
+        const restaurant = await models.Restaurant.findByPk(req.params.id);
+        if (!restaurant) {
+            return res.status(404).json({ message: 'Restaurant no encontrado' });
+        }
+        
+        if (!req.file) {
+            return res.status(400).json({ message: 'No se proporcionó ninguna imagen' });
+        }
+
+        const imageName = req.file.filename;
+        await restaurant.update({ imagen: imageName });
+
+        res.json({ 
+            message: 'Imagen subida exitosamente',
+            imagePath: `/uploads/${imageName}`
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Error al subir la imagen', error: error.message });
+    }
+});
+
+// Iniciar el servidor
+const PORT = process.env.PORT || 8000;
+app.listen(PORT, () => {
+    console.log(`Servidor corriendo en el puerto ${PORT}`);
+});
 
 module.exports = app;
