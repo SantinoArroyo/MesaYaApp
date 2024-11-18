@@ -27,7 +27,7 @@ module.exports = (sequelize) => {
             type: DataTypes.INTEGER,
             allowNull: false,
             references: {
-                model: 'Restaurants', // Nombre de la tabla relacionada
+                model: 'Restaurant', // Nombre de la tabla relacionada
                 key: 'idRestaurant'
             }
         }

@@ -24,7 +24,7 @@ async function getByRestaurantId(req, res) {
             idRestaurant: id
         },
         include: [
-            { model: models.Cliente, attributes: ['nombre'] },
+            { model: models.Cliente, attributes: ['nombre', 'apellido'] },
             { model: models.Mesa, attributes: ['numero', 'cantidadPersonas'] }
         ]
     });
@@ -37,13 +37,23 @@ async function getByRestaurantId(req, res) {
 
 // Crear una nueva reserva
 async function create(req, res) {
-	if (req.body.idReserva) {  
-		res.status(400).send(`Bad request: El ID no debe proporcionarse, ya que lo determina automáticamente la base de datos.`);
-	} else {
-		await models.Reserva.create(req.body);
-		res.status(201).end();
-	}
-};
+    if (req.body.idReserva) {  
+        res.status(400).send(`Bad request: El ID no debe proporcionarse, ya que lo determina automáticamente la base de datos.`);
+    } else {
+        try {
+            console.log('Datos de la reserva:', req.body); // Para depuración
+            const reserva = await models.Reserva.create(req.body);
+            res.status(201).json(reserva);
+        } catch (error) {
+            console.error("Error al crear la reserva:", error);
+            res.status(500).json({ 
+                message: 'Error al crear la reserva',
+                error: error.message,
+                stack: error.stack
+            });
+        }
+    }
+}
 
 // Actualizar una reserva existente
 async function update(req, res) {

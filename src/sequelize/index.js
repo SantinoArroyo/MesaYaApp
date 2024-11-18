@@ -5,15 +5,15 @@ const { applyExtraSetup } = require('./extra-setup');
 // But for this example, we will just use a local SQLite database.
 // const sequelize = new Sequelize(process.env.DB_CONNECTION_URL);
 const sequelize = new Sequelize({
-	dialect: 'sqlite',
-	storage: 'db.sqlite',
-	logQueryParameters: true,
-	benchmark: true
+    dialect: 'sqlite',
+    storage: 'db.sqlite',
+    logQueryParameters: true,
+    benchmark: true
 });
 
 const modelDefiners = [
-	require('./models/Bebida'),
-	require('./models/Cliente'),
+    require('./models/Bebida'),
+    require('./models/Cliente'),
     require('./models/Mesa'),
     require('./models/Pago'),
     require('./models/Plato'),
@@ -23,7 +23,7 @@ const modelDefiners = [
 
 // We define all models according to their files.
 for (const modelDefiner of modelDefiners) {
-	modelDefiner(sequelize);
+    modelDefiner(sequelize);
 }
 
 // We execute any extra setup after the models are defined, such as adding associations.

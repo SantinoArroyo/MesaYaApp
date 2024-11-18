@@ -3,29 +3,33 @@ const app = require('./express/App')
 const PORT = 8000
 
 async function assertDatabaseConnectionOk() {
-	console.log(`Checking database connection...`);
-	try {
-		await sequelize.authenticate();
-		console.log('Database connection OK!');
-	} catch (error) {
-		console.log('Unable to connect to the database:');
-		console.log(error.message);
-		process.exit(1);
-	}
+    console.log(`Checking database connection...`);
+    try {
+        await sequelize.authenticate();
+        console.log('Database connection OK!');
+    } catch (error) {
+        console.log('Unable to connect to the database:');
+        console.log(error.message);
+        process.exit(1);
+    }
 }
 
 async function init() {
-	await assertDatabaseConnectionOk();
+    await assertDatabaseConnectionOk();
 
-    // sync models (create tables if they don't exist)
-    await sequelize.sync();
+    try {
+        // Sincronizar los modelos con la base de datos
+        await sequelize.sync({ force: true }); // Esto eliminará y recreará todas las tablas
+        console.log('Database synced successfully');
 
-	console.log(`Starting Sequelize + Express example on port ${PORT}...`);
-
-
-    app.listen(PORT, () => {
-		console.log(`Express server started on port ${PORT}. Try some routes, such as '/api/users'.`);
-	});
+        // Iniciar el servidor Express después de sincronizar la base de datos
+        app.listen(PORT, () => {
+            console.log(`Express server started on port ${PORT}`);
+        });
+    } catch (error) {
+        console.error('Error syncing database:', error);
+        process.exit(1);
+    }
 }
 
 init();

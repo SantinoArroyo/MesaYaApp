@@ -50,7 +50,7 @@ async function getById(req, res) {
         const baseUrl = `${req.protocol}://${req.get("host")}`;
         const restaurantWithImageUrl = {
             ...restaurant.toJSON(),
-            imagen: restaurant.imagen && !restaurant.imagen.startsWith(baseUrl) ? `${baseUrl}/uploads/${restaurant.imagen}` : restaurant.imagen,
+            imagen: restaurant.imagen ? `${baseUrl}/uploads/${restaurant.imagen}` : null,
         };
         res.status(200).json(restaurantWithImageUrl);
     } else {

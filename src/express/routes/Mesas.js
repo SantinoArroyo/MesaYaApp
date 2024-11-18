@@ -42,6 +42,7 @@ async function create(req, res) {
 	if (req.body.idMesa) {  
 		res.status(400).send(`Bad request: El ID no debe proporcionarse, ya que lo determina automáticamente la base de datos.`);
 	} else {
+		console.log('Datos de la mesa:', req.body); // Para depuración
 		await models.Mesa.create(req.body);
 		res.status(201).end();
 	}
