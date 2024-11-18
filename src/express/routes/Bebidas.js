@@ -22,6 +22,21 @@ async function getById(req, res) {
 	}
 };
 
+// Obtener todas las bebidas de un restaurante por su ID
+async function getByRestaurantId(req, res) {
+    const id = getIdParam(req);
+    const bebidas = await models.Bebida.findAll({
+        where: {
+            idRestaurant: id
+        }
+    });
+    if (bebidas) {
+        res.status(200).json(bebidas);
+    } else {
+        res.status(404).send('404 - Bebidas no encontradas');
+    }
+}
+
 // Crear una nueva bebida
 async function create(req, res) {
 	if (req.body.idBebida) {  
@@ -60,26 +75,13 @@ async function removeById(req, res) {
 	res.status(200).end();
 };
 
-// Eliminar todas las bebidas
-async function removeAll(req, res) {
-    try {
-        await models.Bebida.destroy({
-            where: {},  // Esto elimina todas las bebidas
-            truncate: true  // Esto reinicia el contador de ID
-        });
-        res.status(200).json({ message: 'Todas las bebidas han sido eliminadas' });
-    } catch (error) {
-        res.status(500).json({ message: 'Error al eliminar todas las bebidas', error: error.message });
-    }
-}
 
 // Exportar las funciones
 module.exports = {
+	getByRestaurantId,
 	getAll,
 	getById,
 	create,
 	update,
 	removeById,
-	removeAll,
-
 };

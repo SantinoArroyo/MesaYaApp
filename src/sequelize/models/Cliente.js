@@ -30,22 +30,6 @@ module.exports = (sequelize) => {
         direccion: {
             type: DataTypes.STRING,
             allowNull:false
-        },
-        idProvincia: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            references: {
-                model: 'Provincia',
-                key: 'idProvincia'
-            }
-        },
-        idLocalidad: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            references: {
-                model: 'Localidad',
-                key: 'idLocalidad'
-            }
         }
         });
 };

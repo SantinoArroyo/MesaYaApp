@@ -1,8 +1,5 @@
 function applyExtraSetup(sequelize) {
-    const {Carta, Restaurant, Plato, Bebida, Pago, Mesa, Cliente, Reserva, Provincia, Localidad} = sequelize.models
-
-    Restaurant.hasOne(Carta, { foreignKey: 'idRestaurant' });
-    Carta.belongsTo(Restaurant, { foreignKey: 'idRestaurant' });
+    const { Restaurant, Plato, Bebida, Pago, Mesa, Cliente, Reserva} = sequelize.models
 
     Pago.hasMany(Reserva, { foreignKey: 'idPago' });
     Reserva.belongsTo(Pago, { foreignKey: 'idPago' });
@@ -16,23 +13,11 @@ function applyExtraSetup(sequelize) {
     Restaurant.hasMany(Reserva, { foreignKey: 'idRestaurant' });
     Reserva.belongsTo(Restaurant, { foreignKey: 'idRestaurant' });
 
-    Carta.belongsToMany(Plato, { through: 'CartaPlato', foreignKey: 'idCarta' });
-    Carta.belongsToMany(Bebida, { through: 'CartaBebida', foreignKey: 'idCarta' });
-    
-    Provincia.hasMany(Localidad, { foreignKey: 'idProvincia' });
-    Localidad.belongsTo(Provincia, { foreignKey: 'idProvincia' });
+    Restaurant.hasMany(Plato, { foreignKey: 'idRestaurant' });
+    Plato.belongsTo(Restaurant, { foreignKey: 'idRestaurant' });
 
-    Provincia.hasMany(Restaurant, { foreignKey: 'idProvincia' });
-    Restaurant.belongsTo(Provincia, { foreignKey: 'idProvincia' });
-
-    Localidad.hasMany(Restaurant, { foreignKey: 'idLocalidad' });
-    Restaurant.belongsTo(Localidad, { foreignKey: 'idLocalidad' });
-
-    Provincia.hasMany(Cliente, { foreignKey: 'idProvincia'})
-    Cliente.belongsTo(Provincia, { foreignKey: 'idProvincia'})
-
-    Localidad.hasMany(Cliente, {foreignKey: 'idLocalidad'})
-    Cliente.belongsTo(Localidad, {foreignKey: 'idLocalidad'})
+    Restaurant.hasMany(Bebida, { foreignKey: 'idRestaurant' });
+    Bebida.belongsTo(Restaurant, { foreignKey: 'idRestaurant' });
 };
 
 module.exports = {applyExtraSetup}

@@ -22,6 +22,21 @@ async function getById(req, res) {
 	}
 };
 
+// Obtener todas las mesas de un restaurante por su ID
+async function getByRestaurantId(req, res) {
+    const id = getIdParam(req);
+    const mesas = await models.Mesa.findAll({
+        where: {
+            idRestaurant: id
+        }
+    });
+    if (mesas) {
+        res.status(200).json(mesas);
+    } else {
+        res.status(404).send('404 - Mesas no encontradas');
+    }
+}
+
 // Crear una nueva mesa
 async function create(req, res) {
 	if (req.body.idMesa) {  
@@ -67,4 +82,5 @@ module.exports = {
 	create,
 	update,
 	removeById,
+	getByRestaurantId,
 };

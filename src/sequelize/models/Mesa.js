@@ -1,4 +1,4 @@
-const {DataTypes} = require('sequelize')
+const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
     sequelize.define('Mesa', {
@@ -7,10 +7,27 @@ module.exports = (sequelize) => {
             primaryKey: true,
             autoIncrement: true,
         },
-        numero: DataTypes.INTEGER,
-        estado: DataTypes.STRING,
-        cantidadPersonas: DataTypes.INTEGER,
-    },{
+        numero: {
+            type: DataTypes.INTEGER,
+            allowNull: false
+        },
+        estado: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        cantidadPersonas: {
+            type: DataTypes.INTEGER,
+            allowNull: false
+        },
+        idRestaurant: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: 'Restaurants',
+                key: 'idRestaurant'
+            }
+        }
+    }, {
         tableName: 'Mesa',
         timestamps: false
     });

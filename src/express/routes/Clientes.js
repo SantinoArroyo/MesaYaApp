@@ -28,7 +28,7 @@ async function getById(req, res) {
 // Crear un nuevo cliente
 async function create(req, res) {
 
-	const { nombre, apellido, email, contraseña, telefono, direccion, localidad, provincia } = req.body;
+	const { nombre, apellido, email, contraseña, telefono, direccion } = req.body;
     // Hashea la contraseña
 	const hashedPassword = await bcrypt.hash(contraseña, 10);
 
@@ -40,8 +40,6 @@ async function create(req, res) {
             contraseña: hashedPassword,
             telefono,
             direccion,
-			idLocalidad: localidad,
-			idProvincia: provincia
         });
         res.status(201).json(newUserC);
     } catch (error) {

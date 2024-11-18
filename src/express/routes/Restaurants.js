@@ -38,24 +38,44 @@ async function getAll(req, res) {
 	res.status(200).json(restaurantsWithImageUrl);
 };
 
-// Obtener una reserva por ID
+// Obtener la información de un restaurante por su ID
 async function getById(req, res) {
-	const id = getIdParam(req);
-	const restaurant = await models.Restaurant.findOne({
-		where: {
-			idRestaurant: id  
-		}
-	});
-	if (restaurant) {
-		res.status(200).json(restaurant);
-	} else {
-		res.status(404).send('404 - Reserva no encontrada');
-	}
-};
+    const id = getIdParam(req);
+    const restaurant = await models.Restaurant.findOne({
+        where: {
+            idRestaurant: id
+        }
+    });
+    if (restaurant) {
+        const baseUrl = `${req.protocol}://${req.get("host")}`;
+        const restaurantWithImageUrl = {
+            ...restaurant.toJSON(),
+            imagen: restaurant.imagen && !restaurant.imagen.startsWith(baseUrl) ? `${baseUrl}/uploads/${restaurant.imagen}` : restaurant.imagen,
+        };
+        res.status(200).json(restaurantWithImageUrl);
+    } else {
+        res.status(404).send('404 - Restaurante no encontrado');
+    }
+}
+
+// Obtener todas las reservas de un restaurante por su ID
+async function getReservationsByRestaurantId(req, res) {
+    const id = getIdParam(req);
+    const reservations = await models.Reserva.findAll({
+        where: {
+            idRestaurant: id
+        }
+    });
+    if (reservations) {
+        res.status(200).json(reservations);
+    } else {
+        res.status(404).send('404 - Reservas no encontradas');
+    }
+}
 
 // Crear una nueva reserva
 async function create(req, res) {
-    const { nombre, email, direccion, contraseña, telefono, categoria, cuit, provincia, localidad} = req.body;
+    const { nombre, email, direccion, contraseña, telefono, categoria, cuit} = req.body;
 
 	console.log('Datos recibidos en el backend:', req.body);
 	console.log("Contraseña recibida:", contraseña);
@@ -71,12 +91,10 @@ async function create(req, res) {
             contraseña: hashedPassword,
             telefono,
             categoria,
-            cuit,
-			idProvincia: provincia,
-			idLocalidad: localidad,
+            cuit
         });
 
-		if (!newUserR || !newUserR.id) {
+		if (!newUserR || !newUserR.idRestaurant) {
             throw new Error("Error: El restaurante creado no tiene un ID.");
         }
         res.status(201).json(newUserR);
@@ -87,11 +105,9 @@ async function create(req, res) {
 };
 
 async function uploadImage(req, res) {
-    console.log('Contenido de req.file:', req.file); // Verifica el contenido de req.file
     try {
         const restaurantId = req.params.id;
         const file = req.file;
-        console.log(file)
 
         if (!file) {
             return res.status(400).send('No se ha subido ninguna imagen');
@@ -102,7 +118,7 @@ async function uploadImage(req, res) {
             return res.status(404).send('Restaurante no encontrado');
         }
 
-        saveImage(file)
+        saveImage(file);
 
         restaurant.imagen = file.originalname;
         await restaurant.save();
@@ -112,25 +128,48 @@ async function uploadImage(req, res) {
         console.error('Error al subir la imagen:', error);
         res.status(500).send('Error al subir la imagen');
     }
-};
+}
 
-
-// Actualizar una reserva existente
+// Actualizar un restaurante existente
 async function update(req, res) {
-	const id = getIdParam(req);
+    console.log('Datos recibidos en el backend:', req.body);
+    const id = getIdParam(req);
+    const file = req.file;
 
-	// Solo aceptamos la solicitud de actualización si el parámetro `:id` coincide con el ID del cuerpo de la solicitud
-	if (req.body.idRestaurant === id) {  
-		await models.Restaurant.update(req.body, {
-			where: {
-				idRestaurant: id  
-			}
-		});
-		res.status(200).end();
-	} else {
-		res.status(400).send(`Bad request: El ID del parámetro (${id}) no coincide con el ID del cuerpo (${req.body.idReserva}).`);
-	}
-};
+    // Solo aceptamos la solicitud de actualización si el parámetro `:id` coincide con el ID del cuerpo de la solicitud
+    if (req.body.idRestaurant === id) {
+        const restaurant = await models.Restaurant.findByPk(id);
+        if (!restaurant) {
+            return res.status(404).send('Restaurante no encontrado');
+        }
+
+        // Actualizar solo los campos proporcionados
+        const updatedData = {
+            nombre: req.body.nombre || restaurant.nombre,
+            email: req.body.email || restaurant.email,
+            direccion: req.body.direccion || restaurant.direccion,
+            telefono: req.body.telefono || restaurant.telefono,
+            categoria: req.body.categoria || restaurant.categoria,
+            cuit: req.body.cuit || restaurant.cuit,
+            imagen: file ? file.originalname : (req.body.imagen || restaurant.imagen)
+        };
+
+        // Solo actualizar la contraseña si se proporciona una nueva
+        if (req.body.contraseña) {
+            updatedData.contraseña = await bcrypt.hash(req.body.contraseña, 10);
+        }
+
+        await restaurant.update(updatedData);
+
+        if (file) {
+            saveImage(file);
+        }
+
+        res.status(200).end();
+    } else {
+        res.status(400).send(`Bad request: El ID del parámetro (${id}) no coincide con el ID del cuerpo (${req.body.idRestaurant}).`);
+    }
+}
 
 // Eliminar una reserva
 async function removeById(req, res) {
@@ -142,53 +181,56 @@ async function removeById(req, res) {
 	});
 	res.status(200).end();
 };
-async function getByProvinciaAndLocalidad(req, res) {
-    const idProvincia = req.query.idProvincia;
-    const idLocalidad = req.query.idLocalidad;
 
-    const whereClause = {};
-    if (idProvincia) whereClause.idProvincia = idProvincia;
-    if (idLocalidad) whereClause.idLocalidad = idLocalidad;
+async function login(req, res) {
+    const { email, contraseña } = req.body;
 
-    const restaurants = await models.Restaurant.findAll({
-        where: whereClause,
-        include: [
-            { model: models.Provincia },
-            { model: models.Localidad }
-        ]
-    });
+    try {
+        // Buscar el restaurante por email
+        const restaurant = await models.Restaurant.findOne({ where: { email } });
+        
+        if (!restaurant) {
+            return res.status(401).json({ message: 'Credenciales inválidas' });
+        }
 
-    res.status(200).json(restaurants);
-}
+        // Verificar la contraseña
+        const validPassword = await bcrypt.compare(contraseña, restaurant.contraseña);
+        
+        if (!validPassword) {
+            return res.status(401).json({ message: 'Credenciales inválidas' });
+        }
 
-async function login (req, res) {
-	const {email, contraseña} = req.body;
-	const user = await models.Restaurant.findOne({where: {email}})
+        // Generar token incluyendo el ID del restaurante
+        const token = jwt.sign(
+            { 
+                id: restaurant.idRestaurant,
+                email: restaurant.email
+            },
+            JWT_SECRET,
+            { expiresIn: '24h' }
+        );
 
-	if(!user) {
-		return res.status(401).send('Usuario o contraseña incorrectos')
-	}
+        // Devolver token y datos completos del restaurante
+        res.json({
+            token,
+            restaurant
+        });
 
-	const isPasswordValid = await bcrypt.compare(contraseña, user.contraseña)
-
-	if(!isPasswordValid){
-		return res.status(401).send('Usuario o contraseña incorrectos')
-	}
-
-    const token = jwt.sign({ id: user.idRestaurant, email: user.email }, JWT_SECRET, { expiresIn: '1h' });
-    
-    res.status(200).json({ token });
+    } catch (error) {
+        console.error('Error en login:', error);
+        res.status(500).json({ message: 'Error en el servidor' });
+    }
 }
 
 
 // Exportar las funciones
 module.exports = {
 	getAll,
-	getById,
+    getById,
+    getReservationsByRestaurantId,
 	create,
 	update,
 	removeById,
-	getByProvinciaAndLocalidad,
 	login,
 	uploadImage
 };

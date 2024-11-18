@@ -13,15 +13,12 @@ const sequelize = new Sequelize({
 
 const modelDefiners = [
 	require('./models/Bebida'),
-	require('./models/Carta'),
 	require('./models/Cliente'),
     require('./models/Mesa'),
     require('./models/Pago'),
     require('./models/Plato'),
     require('./models/Reserva'),
-    require('./models/Restaurant'),
-	require('./models/Provincia'),
-	require('./models/Localidad')
+    require('./models/Restaurant')
 ];
 
 // We define all models according to their files.

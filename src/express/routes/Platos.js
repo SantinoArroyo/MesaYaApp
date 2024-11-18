@@ -1,11 +1,6 @@
 const { models } = require('../../sequelize');
 const { getIdParam } = require('../helpers');
 
-// Obtener todos los platos
-async function getAll(req, res) {
-	const platos = await models.Plato.findAll();
-	res.status(200).json(platos);
-};
 
 // Obtener un plato por ID
 async function getById(req, res) {
@@ -21,6 +16,21 @@ async function getById(req, res) {
 		res.status(404).send('404 - Plato no encontrado');
 	}
 };
+
+// Obtener todos los platos de un restaurante por su ID
+async function getByRestaurantId(req, res) {
+    const id = getIdParam(req);
+    const platos = await models.Plato.findAll({
+        where: {
+            idRestaurant: id
+        }
+    });
+    if (platos) {
+        res.status(200).json(platos);
+    } else {
+        res.status(404).send('404 - Platos no encontrados');
+    }
+}
 
 // Crear un nuevo plato
 async function create(req, res) {
@@ -73,10 +83,10 @@ async function removeAll(req, res) {
 }
 // Exportar las funciones
 module.exports = {
-	getAll,
 	getById,
 	create,
 	update,
 	removeById,
 	removeAll,
+	getByRestaurantId,
 };

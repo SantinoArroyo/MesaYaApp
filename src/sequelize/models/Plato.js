@@ -1,4 +1,4 @@
-const {DataTypes} = require('sequelize')
+const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
     sequelize.define('Plato', {
@@ -7,10 +7,30 @@ module.exports = (sequelize) => {
             primaryKey: true,
             autoIncrement: true,
         },
-        nombre: DataTypes.STRING,
-        precio: DataTypes.FLOAT,
-        descripcion: DataTypes.STRING,
-        categoria: DataTypes.STRING
+        nombre: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        precio: {
+            type: DataTypes.FLOAT,
+            allowNull: false
+        },
+        descripcion: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        categoria: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        idRestaurant: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: 'Restaurants', // Nombre de la tabla relacionada
+                key: 'idRestaurant'
+            }
+        }
     }, {
         tableName: 'Plato',
         timestamps: true

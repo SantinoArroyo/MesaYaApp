@@ -2,7 +2,7 @@ const {DataTypes} = require('sequelize')
 
 module.exports = (sequelize) => {
     sequelize.define('Restaurant', {
-        id: {
+        idRestaurant: {
             type: DataTypes.INTEGER,
             primaryKey: true,
             autoIncrement: true,
@@ -39,22 +39,5 @@ module.exports = (sequelize) => {
             type: DataTypes.STRING,
             allowNull: true
         },
-        idProvincia: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            references: {
-                model: 'Provincia',
-                key: 'idProvincia'
-            }
-        },
-        idLocalidad: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            references: {
-                model: 'Localidad',
-                key: 'idLocalidad'
-            }
-        },
-        
     });
 };

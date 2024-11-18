@@ -8,15 +8,12 @@ const upload = multer({ dest: 'uploads/' });
 
 const routes = {
     bebidas: require('./routes/Bebidas'),
-    cartas: require('./routes/Cartas'),
     clientes: require('./routes/Clientes'),
     mesas: require('./routes/Mesas'),
     pagos: require('./routes/Pagos'),
     platos: require('./routes/Platos'),
     reservas: require('./routes/Reservas'),
-    restaurants: require('./routes/Restaurants'),
-    provincias: require('./routes/Provincias'),
-    localidades: require('./routes/Localidades')
+    restaurants: require('./routes/Restaurants')
 }
 
 const app = express();
@@ -76,12 +73,16 @@ for (const [routeName, routeController] of Object.entries(routes)) {
     }
 }
 
-// Nuevas rutas específicas
-app.get('/api/localidades/provincia/:id', makeHandlerAwareOfAsyncErrors(routes.localidades.getByProvincia));
-app.get('/api/restaurants/filter', makeHandlerAwareOfAsyncErrors(routes.restaurants.getByProvinciaAndLocalidad));
+app.post('/api/loginrestaurant', makeHandlerAwareOfAsyncErrors(routes.restaurants.login));
+app.get('/api/restaurants/:id/reservations', makeHandlerAwareOfAsyncErrors(routes.restaurants.getReservationsByRestaurantId));
+app.get('/api/restaurants/:id/mesas', makeHandlerAwareOfAsyncErrors(routes.mesas.getByRestaurantId));
+app.get('/api/restaurants/:id/platos', makeHandlerAwareOfAsyncErrors(routes.platos.getByRestaurantId));
+app.get('/api/restaurants/:id/bebidas', makeHandlerAwareOfAsyncErrors(routes.bebidas.getByRestaurantId));
+app.get('/api/restaurants/:id/reservas', makeHandlerAwareOfAsyncErrors(routes.reservas.getByRestaurantId));
+
 
 app.post('/api/logincliente', makeHandlerAwareOfAsyncErrors(routes.clientes.login))
-app.post('/api/loginrestaurant', makeHandlerAwareOfAsyncErrors(routes.restaurants.login))
+
 
 app.post('/api/restaurants/:id/upload-image', upload.single("imagen"), makeHandlerAwareOfAsyncErrors(routes.restaurants.uploadImage));
 

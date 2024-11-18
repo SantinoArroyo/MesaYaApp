@@ -1,12 +1,6 @@
 const { models } = require('../../sequelize');
 const { getIdParam } = require('../helpers');
 
-// Obtener todas las reservas
-async function getAll(req, res) {
-	const reservas = await models.Reserva.findAll();
-	res.status(200).json(reservas);
-};
-
 // Obtener una reserva por ID
 async function getById(req, res) {
 	const id = getIdParam(req);
@@ -21,6 +15,25 @@ async function getById(req, res) {
 		res.status(404).send('404 - Reserva no encontrada');
 	}
 };
+
+// Obtener todas las reservas de un restaurante por su ID
+async function getByRestaurantId(req, res) {
+    const id = getIdParam(req);
+    const reservas = await models.Reserva.findAll({
+        where: {
+            idRestaurant: id
+        },
+        include: [
+            { model: models.Cliente, attributes: ['nombre'] },
+            { model: models.Mesa, attributes: ['numero', 'cantidadPersonas'] }
+        ]
+    });
+    if (reservas) {
+        res.status(200).json(reservas);
+    } else {
+        res.status(404).send('404 - Reservas no encontradas');
+    }
+}
 
 // Crear una nueva reserva
 async function create(req, res) {
@@ -62,7 +75,7 @@ async function removeById(req, res) {
 
 // Exportar las funciones
 module.exports = {
-	getAll,
+    getByRestaurantId,
 	getById,
 	create,
 	update,
